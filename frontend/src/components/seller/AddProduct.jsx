@@ -1,15 +1,25 @@
+// AddProject.jsx
+
 import axios from "axios";
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useProductContext } from "../../context/ProductContext";
 
 function AddProduct() {
+  const {
+    name,
+    setName,
+    description,
+    setDescription,
+    price,
+    setPrice,
+    stock,
+    setStock,
+    picture,
+    setPicture,
+  } = useProductContext();
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
-  const [picture, setPicture] = useState(null);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -21,6 +31,7 @@ function AddProduct() {
       formData.append("stock", stock);
       formData.append("name", name);
       formData.append("picture", picture);
+      console.log("LOCAL STORAGE-", localStorage.getItem("accessToken"));
 
       const response = await axios.post(
         "http://localhost:8001/product/addProduct",
@@ -32,6 +43,8 @@ function AddProduct() {
           },
         },
       );
+      console.log("Token:", localStorage.getItem("accessToken"));
+      console.log("Role:", localStorage.getItem("role"));
       console.log(response.data);
       navigate("/");
     } catch (error) {

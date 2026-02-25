@@ -1,13 +1,24 @@
+//Register.jsx
+
 import React from "react";
 import axios from "axios";
-import { useState } from "react";
+
+import { toast } from "react-toastify";
+import { useAuthContext } from "../context/AuthContext";
 
 function Register() {
-  const [userName, setuserName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
-  const [picture, setPicture] = useState();
+  const {
+    userName,
+    setuserName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    role,
+    setRole,
+    picture,
+    setPicture,
+  } = useAuthContext();
 
   // const handleRegister = async (e) => {
   //   e.preventDefault();
@@ -45,6 +56,7 @@ function Register() {
       );
 
       console.log(response.data);
+      toast.success("Product registered successfully");
     } catch (error) {
       console.log(error.response?.data || error.message);
     }

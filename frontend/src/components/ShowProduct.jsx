@@ -1,14 +1,45 @@
+//ShowProduct.jsx
+
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useProductContext } from "../context/ProductContext";
+import DeleteProduct from "./seller/DeleteProduct";
+import UpdateProduct from "./seller/UpdateProduct";
+import { Link } from "react-router-dom";
+import { useCartContext } from "../context/CartContext";
+import { toast } from "react-toastify";
+import Logout from "./Logout";
 
 function ShowProduct() {
-  const [products, setProducts] = useState([]);
-  const role = localStorage.getItem("role");
+  const {
+    products,
+    setProducts,
+    setIsDelOpen,
+    setIsEditOpen,
+    setProductId,
+    setEditName,
+    setEditDescription,
+    setEditPrice,
+    setEditStock,
+    setEditPicture,
+  } = useProductContext();
 
-  function editProduct() {}
-  function deleteProduct(id) {
-    products.filter((itemToDlt) => itemToDlt.id !== id);
+  const { setCart } = useCartContext();
+
+  function editProduct(id, name, description, price, stock, picture) {
+    setIsEditOpen(true);
+    setProductId(id);
+    setEditName(name);
+    setEditDescription(description);
+    setEditPrice(price);
+    setEditStock(stock);
+    setEditPicture(picture);
   }
+  function deleteProduct(id) {
+    setIsDelOpen(true);
+    setProductId(id);
+  }
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -27,6 +58,29 @@ function ShowProduct() {
     fetchProducts();
   }, []);
 
+  const addToCart = async (productId) => {
+    try {
+      console.log("CLICKED, ID:", productId);
+      console.log(localStorage.getItem("accessToken"));
+
+      const response = await axios.post(
+        `http://localhost:8001/cart/addCart/${productId}`,
+        { quantity: 1 },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        },
+      );
+
+      toast.success("Product added to cart");
+      console.log(response.data);
+      setCart(response.data.data.items);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="grid grid-cols-4 gap-6 p-10">
       {products.map((item) => (
@@ -41,31 +95,52 @@ function ShowProduct() {
           />
 
           <h2 className="text-lg font-bold mt-3">{item.name}</h2>
-          <p className="text-gray-600 break-words">{item.description}</p>
 
-          <div className="flex justify-between mt-3">
+          <div className="flex justify-between">
             <span className="font-bold text-green-600">₹ {item.price}</span>
-            <span>Stock: {item.stock}</span>
           </div>
 
           {role === "seller" && (
             <div className="flex justify-between mt-3">
               <button
                 className="font-bold text-yellow-600"
-                onClick={() => editProduct(item.id)}
+                onClick={() =>
+                  editProduct(
+                    item._id,
+                    item.name,
+                    item.description,
+                    item.price,
+                    item.stock,
+                    item.picture,
+                  )
+                }
               >
                 Edit
               </button>
               <button
                 className="font-bold text-red-600"
-                onClick={() => deleteProduct(item.id)}
+                onClick={() => deleteProduct(item._id)}
               >
                 Delete
               </button>
             </div>
           )}
+
+          {role === "buyer" && (
+            <Link to="/addcart">
+              <button
+                className="block rounded border-2 border-green-400 font-bold text-yellow-600 bg-green-200 px-4 py-1 m-auto mt-3"
+                onClick={() => addToCart(item._id)}
+              >
+                Add to cart
+              </button>
+            </Link>
+          )}
         </div>
       ))}
+      <DeleteProduct />
+      <UpdateProduct />
+      <Logout />
     </div>
   );
 }

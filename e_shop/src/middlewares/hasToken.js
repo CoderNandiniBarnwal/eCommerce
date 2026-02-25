@@ -1,3 +1,5 @@
+//hasToken.js
+
 import jwt from "jsonwebtoken";
 import userSchema from "../models/userSchema.js";
 import sessionSchema from "../models/sessionSchema.js";

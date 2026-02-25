@@ -4,6 +4,7 @@ import {
   deleteProduct,
   getAllProduct,
   getProductById,
+  paginateProduct,
   updateProduct,
 } from "../controller/productController.js";
 import { sellerRoleMiddleware } from "../middlewares/sellerRoleMiddleware.js";
@@ -31,7 +32,9 @@ productRoute.put(
   "/updateProduct/:id",
   hasToken,
   sellerRoleMiddleware,
+  upload.single("picture"),
   updateProduct,
 );
+productRoute.get("/paginate", hasToken, paginateProduct);
 
 export default productRoute;

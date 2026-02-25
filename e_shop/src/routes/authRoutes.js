@@ -31,7 +31,7 @@ authRoute.post(
 
 authRoute.get("/verify", verifyToken);
 authRoute.post("/login", login);
-authRoute.delete("/logout/:id", hasToken, logout);
-authRoute.put("/update/:id", updateUser);
+authRoute.delete("/logout", hasToken, logout);
+authRoute.put("/update/:id",upload.single("picture"),userValidate(userValidationSchema), updateUser);
 
 export default authRoute;

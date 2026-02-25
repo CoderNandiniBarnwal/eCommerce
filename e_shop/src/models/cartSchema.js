@@ -8,7 +8,6 @@ const cartSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "eUser",
       required: true,
-      unique: true,
     },
     items: [
       {
@@ -23,10 +22,10 @@ const cartSchema = new mongoose.Schema(
           min: 1,
           required: true,
         },
-        // price: {
-        //   type: Number,
-        //   required: true,
-        // },
+        price: {
+          type: Number,
+          required: true,
+        },
       },
     ],
 

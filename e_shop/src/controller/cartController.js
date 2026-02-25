@@ -1,3 +1,5 @@
+//cartController.js
+
 import cartSchema from "../models/cartSchema.js";
 import productSchema from "../models/productSchema.js";
 
@@ -6,7 +8,10 @@ export const addCart = async (req, res) => {
     let { quantity } = req.body;
     const { productId } = req.params;
 
-    quantity = Number(quantity) || 1;
+    quantity = Number(quantity);
+    if (!quantity || quantity < 1) {
+      quantity = 1;
+    }
 
     const product = await productSchema.findById(productId);
     if (!product) {
@@ -16,38 +21,87 @@ export const addCart = async (req, res) => {
       });
     }
 
-    const cart = await cartSchema.findOne({ userId: req.userId });
+    let cart = await cartSchema.findOne({ userId: req.userId });
     if (cart) {
       const existingItem = cart.items.find(
         (item) => item.productId.toString() === productId,
       );
 
       if (existingItem) {
-        existingItem.quantity += quantity;
+        const netQuantity = existingItem.quantity + quantity;
+
+        if (netQuantity > product.stock) {
+          return res.status(400).json({
+            success: false,
+            message: `Only ${product.stock} items in a stock, Product out of stock`,
+          });
+        }
+        existingItem.quantity = netQuantity;
       } else {
-        cart.items.push({ productId: productId, quantity: quantity });
+        if (quantity > product.stock) {
+          return res.status(400).json({
+            success: false,
+            message: `Only ${product.stock} items in a stock, Product out of stock`,
+          });
+        }
+
+        cart.items.push({
+          productId: productId,
+          quantity: quantity,
+          price: product.price,
+        });
       }
+
+      const totalAmount = cart.items.reduce(
+        (acc, i) => acc + i.quantity * i.price,
+        0,
+      );
+      cart.totalAmount = totalAmount;
       await cart.save();
+      await cart.populate(
+        "items.productId",
+        "name description stock picture price",
+      );
 
       return res.status(200).json({
         success: true,
         message: "product added successfully",
         data: cart,
+        totalItems: cart.items.length,
+        totalAmount: cart.totalAmount,
       });
     } else {
-      const newCart = await cartSchema.create({
+      if (quantity > product.stock) {
+        return res.status(400).json({
+          success: false,
+          message: `Only ${product.stock} items in a stock, Product out of stock`,
+        });
+      }
+
+      let newCart = await cartSchema.create({
         userId: req.userId,
         items: [
           {
             productId: productId,
             quantity: quantity,
+            price: product.price,
           },
         ],
       });
+
+      newCart.totalAmount = quantity * product.price;
+      await newCart.save();
+      await newCart.populate(
+        "items.productId",
+        "name description price stock picture",
+      );
+
       return res.status(201).json({
         success: true,
         message: "Cart created & product added successfully",
         data: newCart,
+        totalAmount: newCart.totalAmount,
+        totaItems: newCart.items.length,
       });
     }
   } catch (error) {
@@ -62,7 +116,7 @@ export const getCart = async (req, res) => {
   try {
     const cart = await cartSchema
       .findOne({ userId: req.userId })
-      .populate("items.productId");
+      .populate("items.productId", "name description stock picture price");
 
     if (!cart) {
       return res.status(404).json({
@@ -72,9 +126,12 @@ export const getCart = async (req, res) => {
     }
 
     const totalAmount = cart.items.reduce(
-      (acc, i) => acc + i.quantity * i.productId.price,
+      (acc, i) => acc + i.quantity * i.price,
       0,
     );
+    // cart.totalAmount = totalAmount;
+    // await cart.save();
+
     return res.status(200).json({
       success: true,
       message: "product fetched successfully",
@@ -117,12 +174,24 @@ export const deleteCart = async (req, res) => {
       (itemToDelete) => itemToDelete.productId.toString() !== productId,
     );
 
+    const totalAmount = cart.items.reduce(
+      (acc, i) => acc + i.quantity * i.price,
+      0,
+    );
+
+    cart.totalAmount = totalAmount;
     await cart.save();
+
+    await cart.populate(
+      "items.productId",
+      "name description stock picture price",
+    );
 
     return res.status(200).json({
       success: true,
       message: "product removed successfully",
       data: cart,
+      totalAmount,
     });
   } catch (error) {
     return res.status(500).json({
@@ -138,7 +207,7 @@ export const updateCart = async (req, res) => {
     let { quantity } = req.body;
     quantity = Number(quantity);
 
-    if (!quantity || quantity < 1) {
+    if (isNaN(quantity)) {
       return res.status(400).json({
         success: false,
         message: "Quantity must be greater than 0",
@@ -164,13 +233,45 @@ export const updateCart = async (req, res) => {
         message: "product not in cart",
       });
     }
-    existingItem.quantity = quantity;
+    const product = await productSchema.findById(productId);
+    if (!product)
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+
+    const netQuantity = existingItem.quantity + quantity;
+
+    if (netQuantity > product.stock) {
+      return res.status(400).json({
+        success: false,
+        message: `Only ${product.stock} in a stock`,
+      });
+    }
+    if (netQuantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimum 1 product is required in a cart`,
+      });
+    } else {
+      existingItem.quantity = netQuantity;
+    }
+    const totalAmount = cart.items.reduce(
+      (acc, i) => acc + i.quantity * i.price,
+      0,
+    );
     await cart.save();
+    await cart.populate(
+      "items.productId",
+      "name description price stock picture",
+    );
 
     return res.status(200).json({
       success: true,
       message: "product updated successfully",
       data: cart,
+      totalItems: cart.items.length,
+      totalAmount: cart.totalAmount,
     });
   } catch (error) {
     return res.status(500).json({

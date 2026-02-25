@@ -19,7 +19,7 @@ export const register = async (req, res) => {
     }
 
     const allowTypes = ["image/jpeg", "image/png", "image/svg+xml"];
-    if (!allowTypes) {
+    if (!allowTypes.includes(req.file.mimetype)) {
       return res.status(400).json({
         success: false,
         message: "Invalid extension",
@@ -79,6 +79,7 @@ export const login = async (req, res) => {
     }
 
     const passwordCheck = await bcrypt.compare(password, user.password);
+    // const passwordCheck = password === user.password;
     if (!passwordCheck) {
       return res.status(400).json({
         success: false,
@@ -90,12 +91,20 @@ export const login = async (req, res) => {
       await sessionSchema.findOneAndDelete({ userId: user._id });
       await sessionSchema.create({ userId: user._id });
 
-      const accessToken = jwt.sign({ id: user._id }, process.env.secretKey, {
-        expiresIn: "30days",
-      });
-      const refreshToken = jwt.sign({ id: user._id }, process.env.secretKey, {
-        expiresIn: "10days",
-      });
+      const accessToken = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.secretKey,
+        {
+          expiresIn: "30days",
+        },
+      );
+      const refreshToken = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.secretKey,
+        {
+          expiresIn: "10days",
+        },
+      );
       user.isLogin = true;
       await user.save();
 
@@ -123,7 +132,7 @@ export const logout = async (req, res) => {
   console.log(req.userId);
   try {
     const existing = await sessionSchema.findOne({ userId: req.userId });
-    const user = await userSchema.findById({ _id: req.userId });
+    const user = await userSchema.findById(req.userId);
 
     if (existing) {
       await sessionSchema.findOneAndDelete({ userId: req.userId });
@@ -149,83 +158,44 @@ export const logout = async (req, res) => {
     });
   }
 };
-export const updateUser = async (req, res) => {
-  try {
-    const { userName, email, password, role } = req.body;
-    const id = req.params.id;
-
-    const userExists = await userSchema.findOne({ email, id: !id });
-    if (userExists) {
-      return res.status(400).json({
-        success: false,
-        message: "User already registered",
-      });
-    }
-
-    const user = await userSchema.findOne({
-      _id: id,
-      userId: req.userId,
-    });
-
-    const hashPassword = await bcrypt.hash(password, 10);
-
-    user.userName = userName;
-    user.email = email;
-    user.password = hashPassword;
-    user.role = role;
-    await user.save();
-
-    if (user) {
-      return res.status(200).json({
-        success: true,
-        message: "User updated successfully",
-        data: user,
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: "User not updated",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// export const addPicture = async (req, res) => {
+// export const updateUser = async (req, res) => {
 //   try {
-//     const userId = req.params.id;
+//     const { userName, email, password, role } = req.body;
+//     const id = req.params.id;
 
-//     if (!req.file) {
+//     const userExists = await userSchema.findOne({ email, id: !id });
+//     if (userExists) {
 //       return res.status(400).json({
 //         success: false,
-//         message: "Image not found",
+//         message: "User already registered",
 //       });
 //     }
 
-//     const allowTypes = ["image/jpeg", "image/png", "image/svg+xml"];
-//     if (!allowTypes.includes(req.file.mimetype)) {
+//     const user = await userSchema.findOne({
+//       _id: id,
+//       userId: req.userId,
+//     });
+
+//     const hashPassword = await bcrypt.hash(password, 10);
+
+//     user.userName = userName;
+//     user.email = email;
+//     user.password = hashPassword;
+//     user.role = role;
+//     await user.save();
+
+//     if (user) {
+//       return res.status(200).json({
+//         success: true,
+//         message: "User updated successfully",
+//         data: user,
+//       });
+//     } else {
 //       return res.status(400).json({
 //         success: false,
-//         message: "Invalid extension",
+//         message: "User not updated",
 //       });
 //     }
-
-//     const imgUrl = `http://localhost:8001/uploads/${req.file.filename}`;
-
-//     const user = await userSchema.create({
-//       userId,
-//       picture: imgUrl,
-//     });
-
-//     return res.status(201).json({
-//       success: true,
-//       message: "Image uploaded successfully",
-//       data: user,
-//     });
 //   } catch (error) {
 //     return res.status(500).json({
 //       success: false,
@@ -233,3 +203,71 @@ export const updateUser = async (req, res) => {
 //     });
 //   }
 // };
+
+export const updateUser = async (req, res) => {
+  try {
+    const { userName, email, password, role } = req.body;
+    const id = req.params.id;
+
+    const user = await userSchema.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Email update
+    if (email) {
+      const userExists = await userSchema.findOne({
+        email,
+        _id: { $ne: id },
+      });
+
+      if (userExists) {
+        return res.status(400).json({
+          success: false,
+          message: "User already registered",
+        });
+      }
+
+      user.email = email;
+    }
+
+    if (userName) user.userName = userName;
+    if (role) user.role = role;
+
+    // Password update
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    // Image update
+    if (req.file) {
+      const allowTypes = ["image/jpeg", "image/png", "image/svg+xml"];
+
+      if (!allowTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid extension",
+        });
+      }
+
+      user.picture = `http://localhost:8001/upload/${req.file.filename}`;
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

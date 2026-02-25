@@ -1,11 +1,21 @@
+//Login.jsx
+
 import axios from "axios";
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useAuthContext } from "../context/AuthContext";
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    loginUser,
+  } = useAuthContext();
+
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -17,22 +27,13 @@ function Login() {
       console.log(response.data);
 
       if (response.data.success) {
-        localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem("refreshToken", response.data.refreshToken);
-        // localStorage.setItem("role", response.data.user.role);
-        localStorage.setItem("role", response.data.data.role);
+        loginUser(response.data);
 
         navigate("/");
-      } else {
-        console.log(response.data.message);
+        toast.success("User Login successfully");
       }
     } catch (error) {
-      // console.log(error);
-      console.log("FULL ERROR:", error);
-      console.log("Error Response:", error.response);
-      console.log("Error Data:", error.response?.data);
-
-      // alert(error.response?.data?.message || "Login failed");
+      console.log(error.response?.data);
     }
   };
   return (

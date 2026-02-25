@@ -1,5 +1,8 @@
+//Verify.jsx
+
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useAuthContext } from "../context/authContext";
 
 // function VerifyEmail() {
 //   const [searchParams] = useSearchParams();
@@ -56,9 +59,10 @@ import { useEffect, useState } from "react";
 
 function VerifyEmail() {
   const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState("Veryfying...");
   const token = searchParams.get("token");
   const navigate = useNavigate();
+
+  const { status, setStatus } = useAuthContext();
 
   useEffect(() => {
     const verifyUser = async () => {
