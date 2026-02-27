@@ -20,6 +20,13 @@ export const ProductProvider = ({ children }) => {
   const [editStock, setEditStock] = useState(0);
   const [editPicture, setEditPicture] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
+
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+
   return (
     <ProductContext.Provider
       value={{
@@ -51,6 +58,16 @@ export const ProductProvider = ({ children }) => {
         setEditStock,
         editPicture,
         setEditPicture,
+        sort,
+        setSort,
+        search,
+        setSearch,
+        category,
+        setCategory,
+        currentPage,
+        setCurrentPage,
+        totalPage,
+        setTotalPage,
       }}
     >
       {children}

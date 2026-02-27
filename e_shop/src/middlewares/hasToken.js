@@ -38,16 +38,15 @@ export const hasToken = async (req, res, next) => {
           }
 
           const existing = await sessionSchema.findOne({ userId: id });
-          if (existing) {
-            req.userId = id;
-            req.user = user;
-            next();
-          } else {
+          if (!existing) {
             return res.status(200).json({
               success: true,
               message: "User logged out already",
             });
           }
+          req.userId = id;
+          req.user = user;
+          next();
         }
       });
     }

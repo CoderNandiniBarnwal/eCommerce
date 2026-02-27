@@ -127,26 +127,26 @@ export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, price, stock } = req.body;
+    const checkProduct = await productSchema.findById(id);
+    console.log("Actual seller of product:", checkProduct?.seller);
+    console.log("Logged in seller:", req.userId);
     console.log("PARAM ID:", id);
     console.log("REQ USER ID:", req.userId);
+    let imgUrl = "";
 
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "can't find image",
-      });
+    if (req.file) {
+      const allowTypes = ["image/jpeg", "image/png", "image/svg+xml"];
+      if (!allowTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid extension",
+        });
+      }
+
+      console.log("FILE:", req.file);
+
+      imgUrl = `http://localhost:8001/upload/${req.file.filename}`;
     }
-    const allowTypes = ["image/jpeg", "image/png", "image/svg+xml"];
-    if (!allowTypes.includes(req.file.mimetype)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid extension",
-      });
-    }
-
-    console.log("FILE:", req.file);
-
-    const imgUrl = `http://localhost:8001/upload/${req.file.filename}`;
 
     const user = await productSchema.findOne({
       seller: req.userId,
@@ -163,7 +163,7 @@ export const updateProduct = async (req, res) => {
     user.description = description;
     user.price = price;
     user.stock = stock;
-    user.picture = imgUrl;
+    if (imgUrl) user.picture = imgUrl;
 
     await user.save();
 
@@ -181,17 +181,52 @@ export const updateProduct = async (req, res) => {
 };
 export const paginateProduct = async (req, res) => {
   try {
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 4;
+    // const page = Number(req.query.page) || 1;
+    // const limit = Number(req.query.limit) || 4;
+
+    let {
+      page = 1,
+      limit = 8,
+      sort = "",
+      search = "",
+      category = "",
+    } = req.query;
+    page = Number(page) || 1;
+    limit = Number(limit) || 8;
 
     const skip = (page - 1) * limit;
 
-    const product = await productSchema.find({}).skip(skip).limit(limit);
+    const query = {};
+
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    if (category) {
+      query.category = category;
+    }
+
+    let sortOption = {};
+    if (sort === "low") sortOption.price = 1;
+    if (sort === "high") sortOption.price = -1;
+
+    const totalProduct = await productSchema.countDocuments(query);
+    console.log(query);
+    console.log(totalProduct);
+
+    const user = await productSchema
+      .find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(totalProduct / limit);
 
     return res.status(200).json({
       success: true,
       message: "Product selected as per query",
       data: user,
+      totalPages,
     });
   } catch (error) {
     return res.status(500).json({

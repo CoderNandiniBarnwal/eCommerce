@@ -57,7 +57,7 @@ function AddProduct() {
         className="max-w-md mx-auto mt-20 p-6 bg-white border rounded-lg shadow-lg"
         onSubmit={handleAdd}
       >
-        <h2 className="text-2xl font-bold mb-6">Feedback Form</h2>
+        <h2 className="text-2xl font-bold mb-6">Add Product</h2>
         <div className="mb-4">
           <label className="block text-gray-700 font-bold mb-2" htmlFor="name">
             Name:

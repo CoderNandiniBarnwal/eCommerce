@@ -82,11 +82,11 @@ function ShowProduct() {
   };
 
   return (
-    <div className="grid grid-cols-4 gap-6 p-10">
+    <div className="grid grid-cols-4 gap-6 p-10 h-[700px]">
       {products.map((item) => (
         <div
           key={item._id}
-          className="border rounded-lg shadow-md p-4 hover:shadow-xl transition"
+          className="border rounded-lg shadow-md p-4 hover:shadow-xl transition h-[300px]"
         >
           <img
             src={item.picture}
@@ -129,7 +129,7 @@ function ShowProduct() {
           {role === "buyer" && (
             <Link to="/addcart">
               <button
-                className="block rounded border-2 border-green-400 font-bold text-yellow-600 bg-green-200 px-4 py-1 m-auto mt-3"
+                className="block rounded border-2 border-green-400 font-bold text-yellow-600 bg-green-200 px-4 py-1 m-auto mt-2"
                 onClick={() => addToCart(item._id)}
               >
                 Add to cart

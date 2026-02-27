@@ -3,14 +3,16 @@
 import React from "react";
 import { FaSearch } from "react-icons/fa";
 import { IoCart } from "react-icons/io5";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import { useCartContext } from "../context/CartContext";
 import { useEffect } from "react";
+import { useState } from "react";
 
 function Navbar() {
   const { cart, getCart } = useCartContext();
   const { user, logoutUser } = useAuthContext();
+  const [search, setSearch] = useState("");
 
   function handleLogout() {
     logoutUser();
@@ -21,6 +23,13 @@ function Navbar() {
     }
   }, [user?.role, user]);
 
+  const navigate = useNavigate();
+
+  function handleSearch() {
+    // navigate(`/product?page=1&search=${search}`);
+    navigate(`/searchproduct?search=${search}`);
+  }
+
   return (
     <>
       <div>
@@ -30,7 +39,16 @@ function Navbar() {
           </div>
 
           <div className="flex justify-end items-center w-[80%] mx-[1%]">
-            <FaSearch className="text-4xl mr-4  " />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex px-4 text-gray-700 border-2 border-gray-600 w-[180px] mr-2 outline-none"
+            />
+            <button onClick={handleSearch}>
+              <FaSearch className="text-4xl mr-4  " />
+            </button>
 
             {!user?.role ? (
               <Link to="/login">
