@@ -58,7 +58,8 @@ function Register() {
       console.log(response.data);
       toast.success("Product registered successfully");
     } catch (error) {
-      console.log(error.response?.data || error.message);
+      toast.error(error.response?.data.message || error.message);
+      console.log(error.response?.data.message || error.message);
     }
   };
 

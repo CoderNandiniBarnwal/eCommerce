@@ -4,6 +4,8 @@ import React, { useEffect } from "react";
 import { useCartContext } from "../../context/CartContext";
 import axios from "axios";
 import DeleteCart from "./DeleteCart";
+import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 function AddCart() {
   const { cart, setCart, setIsCartDelOpen, setCartId, getCart } =
@@ -36,6 +38,7 @@ function AddCart() {
       setCart([...response.data.data.items]);
     } catch (error) {
       console.log(error);
+      toast.error(error.response?.data.message);
     }
   };
 
@@ -43,6 +46,24 @@ function AddCart() {
     setIsCartDelOpen(true);
     setCartId(id);
   }
+
+  const clearCart = async () => {
+    try {
+      const response = await axios.delete(
+        "http://localhost:8001/cart/clearCart",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        },
+      );
+      console.log(response);
+      setCart([]);
+      toast.success("Order placed successfully!");
+    } catch (error) {
+      toast.error(error.response?.data.message);
+    }
+  };
   return (
     <div className="p-10">
       <h1 className="text-2xl font-bold mb-6 text-center">My Cart</h1>
@@ -50,7 +71,7 @@ function AddCart() {
         {cart.map((item) => (
           <div
             key={item._id || item.productId}
-            className="border p-4 mb-4 rounded gap-4 items-center w-[23%]"
+            className="border p-4 mb-4 rounded gap-4 items-center w-full lg:w-[23%] md:w-[47%] sm:w-[48%]"
           >
             <img
               src={item.productId.picture}
@@ -93,6 +114,14 @@ function AddCart() {
         ))}
       </div>
       <h2 className="text-xl font-bold mt-6 ">Grand Total: ₹{total}</h2>
+      <Link to="/thankyou">
+        <button
+          className="text-center text-3xl px-5 py-2 bg-yellow-600 text-white rounded font-bold mt-2 "
+          onClick={clearCart}
+        >
+          Place order
+        </button>
+      </Link>
       <DeleteCart />
     </div>
   );

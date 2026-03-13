@@ -22,6 +22,7 @@ import PaginateProduct from "./components/PaginateProduct";
 import ShowProduct from "./components/ShowProduct";
 import Footer from "./components/Footer";
 import SearchProduct from "./components/SearchProduct";
+import ThankYou from "./components/buyer/ThankYou";
 
 export default function App() {
   return (
@@ -67,6 +68,7 @@ export default function App() {
               <Route path="/paginate" element={<PaginateProduct />} />
               <Route path="/footer" element={<Footer />} />
               <Route path="/searchproduct" element={<SearchProduct />} />
+              <Route path="/thankyou" element={<ThankYou />} />
             </Routes>
           </BrowserRouter>
         </CartProvider>

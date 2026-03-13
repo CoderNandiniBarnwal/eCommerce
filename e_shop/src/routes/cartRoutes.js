@@ -1,6 +1,7 @@
 import express from "express";
 import {
   addCart,
+  clearCart,
   deleteCart,
   getCart,
   updateCart,
@@ -25,5 +26,6 @@ cartRoute.put(
   buyerRoleMiddleware,
   updateCart,
 );
+cartRoute.delete("/clearCart", hasToken, buyerRoleMiddleware, clearCart);
 
 export default cartRoute;

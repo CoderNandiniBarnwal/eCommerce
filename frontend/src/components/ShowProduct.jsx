@@ -1,11 +1,10 @@
-//ShowProduct.jsx
+// ShowProduct.jsx
 
 import axios from "axios";
 import React, { useEffect } from "react";
 import { useProductContext } from "../context/ProductContext";
 import DeleteProduct from "./seller/DeleteProduct";
 import UpdateProduct from "./seller/UpdateProduct";
-import { Link } from "react-router-dom";
 import { useCartContext } from "../context/CartContext";
 import { toast } from "react-toastify";
 import Logout from "./Logout";
@@ -25,6 +24,7 @@ function ShowProduct() {
   } = useProductContext();
 
   const { setCart } = useCartContext();
+  const role = localStorage.getItem("role");
 
   function editProduct(id, name, description, price, stock, picture) {
     setIsEditOpen(true);
@@ -35,11 +35,11 @@ function ShowProduct() {
     setEditStock(stock);
     setEditPicture(picture);
   }
+
   function deleteProduct(id) {
     setIsDelOpen(true);
     setProductId(id);
   }
-  const role = localStorage.getItem("role");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -47,22 +47,17 @@ function ShowProduct() {
         const response = await axios.get(
           "http://localhost:8001/product/getAllProduct",
         );
-
-        console.log(response.data);
         setProducts(response.data.data);
       } catch (error) {
         console.log(error);
+        toast.error(error.response?.data.message);
       }
     };
-
     fetchProducts();
   }, []);
 
   const addToCart = async (productId) => {
     try {
-      console.log("CLICKED, ID:", productId);
-      console.log(localStorage.getItem("accessToken"));
-
       const response = await axios.post(
         `http://localhost:8001/cart/addCart/${productId}`,
         { quantity: 1 },
@@ -72,21 +67,20 @@ function ShowProduct() {
           },
         },
       );
-
       toast.success("Product added to cart");
-      console.log(response.data);
       setCart(response.data.data.items);
     } catch (error) {
       console.log(error);
+      toast.error(error.response?.data.message);
     }
   };
 
   return (
-    <div className="grid grid-cols-4 gap-6 p-10 h-[700px]">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4 md:p-10">
       {products.map((item) => (
         <div
           key={item._id}
-          className="border rounded-lg shadow-md p-4 hover:shadow-xl transition h-[300px]"
+          className="border rounded-lg shadow-md p-4 hover:shadow-xl transition h-auto flex flex-col"
         >
           <img
             src={item.picture}
@@ -96,7 +90,7 @@ function ShowProduct() {
 
           <h2 className="text-lg font-bold mt-3">{item.name}</h2>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between mt-2">
             <span className="font-bold text-green-600">₹ {item.price}</span>
           </div>
 
@@ -127,17 +121,17 @@ function ShowProduct() {
           )}
 
           {role === "buyer" && (
-            <Link to="/addcart">
-              <button
-                className="block rounded border-2 border-green-400 font-bold text-yellow-600 bg-green-200 px-4 py-1 m-auto mt-2"
-                onClick={() => addToCart(item._id)}
-              >
-                Add to cart
-              </button>
-            </Link>
+            <button
+              className="mt-auto block rounded border-2 border-green-400 font-bold text-yellow-600 bg-green-200 px-4 py-1 m-auto"
+              onClick={() => addToCart(item._id)}
+            >
+              Add to cart
+            </button>
           )}
         </div>
       ))}
+
+      {/* Modals / components */}
       <DeleteProduct />
       <UpdateProduct />
       <Logout />

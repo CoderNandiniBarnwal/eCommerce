@@ -280,3 +280,29 @@ export const updateCart = async (req, res) => {
     });
   }
 };
+export const clearCart = async (req, res) => {
+  try {
+    const cart = await cartSchema.findOne({ userId: req.userId });
+
+    if (!cart) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found",
+      });
+    }
+    cart.items = [];
+    cart.totalAmount = 0;
+    await cart.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Cart cleared successfullly",
+      data: cart,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

@@ -8,13 +8,8 @@ import { toast } from "react-toastify";
 import { useAuthContext } from "../context/AuthContext";
 
 function Login() {
-  const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    loginUser,
-  } = useAuthContext();
+  const { email, setEmail, password, setPassword, loginUser } =
+    useAuthContext();
 
   const navigate = useNavigate();
 
@@ -33,7 +28,8 @@ function Login() {
         toast.success("User Login successfully");
       }
     } catch (error) {
-      console.log(error.response?.data);
+      console.log(error.response?.data.message);
+      toast.error(error.response?.data.message);
     }
   };
   return (
