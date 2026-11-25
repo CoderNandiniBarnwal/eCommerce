@@ -11,6 +11,14 @@ import cors from "cors";
 const port = process.env.port;
 const app = express();
 
+
+// Temporary debugging code
+console.log({
+  mailUser: process.env.mailUser,
+  mailPassExists: !!process.env.mailPass,
+  mailPassLength: process.env.mailPass?.length
+});
+
 app.use(cors());
 app.use(express.json());
 app.use("/user", authRoute);

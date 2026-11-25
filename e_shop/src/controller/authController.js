@@ -19,6 +19,7 @@ export const register = async (req, res) => {
     }
 
     const allowTypes = ["image/jpeg", "image/png", "image/svg+xml"];
+    
     if (!allowTypes.includes(req.file.mimetype)) {
       return res.status(400).json({
         success: false,
@@ -129,8 +130,7 @@ export const login = async (req, res) => {
   }
 };
 export const logout = async (req, res) => {
-  console.log(req.userId);
-  try {
+    try {
     const existing = await sessionSchema.findOne({ userId: req.userId });
     const user = await userSchema.findById(req.userId);
 

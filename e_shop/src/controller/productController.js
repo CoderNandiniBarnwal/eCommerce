@@ -94,44 +94,43 @@ export const getAllProduct = async (req, res) => {
   }
 };
 
+
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = await productSchema.findByIdAndDelete({
-      userId: req.userId,
+    const product = await productSchema.findOneAndDelete({
       _id: id,
+      seller: req.userId,
     });
 
-    if (user) {
-      return res.status(201).json({
-        success: true,
-        message: "Product created successfully",
-        data: user,
-      });
-    } else {
+    if (!product) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: "Product not found",
       });
     }
+
+    return res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+      data: product,
+    });
+
   } catch (error) {
     return res.status(500).json({
-      success: true,
+      success: false,
       message: error.message,
     });
   }
 };
+
 
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, price, stock } = req.body;
     const checkProduct = await productSchema.findById(id);
-    console.log("Actual seller of product:", checkProduct?.seller);
-    console.log("Logged in seller:", req.userId);
-    console.log("PARAM ID:", id);
-    console.log("REQ USER ID:", req.userId);
     let imgUrl = "";
 
     if (req.file) {
@@ -152,10 +151,11 @@ export const updateProduct = async (req, res) => {
       seller: req.userId,
       _id: id,
     });
+    
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "product not found",
+        message: "product not found or User cannot update other's product",
       });
     }
 
@@ -181,8 +181,6 @@ export const updateProduct = async (req, res) => {
 };
 export const paginateProduct = async (req, res) => {
   try {
-    // const page = Number(req.query.page) || 1;
-    // const limit = Number(req.query.limit) || 4;
 
     let {
       page = 1,
@@ -198,7 +196,7 @@ export const paginateProduct = async (req, res) => {
 
     const query = {};
 
-    if (search) {
+    if (search && search.trim() !== "") {
       query.name = { $regex: search, $options: "i" };
     }
 
