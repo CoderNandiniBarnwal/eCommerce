@@ -21,8 +21,16 @@ export const CartProvider = ({ children }) => {
           },
         },
       );
-      setCart(response.data.data.items);
-      console.log(response);
+
+      console.log("GET CART RESPONSE");
+      console.log(response.data);
+      
+    if (response.data?.data?.items) {
+      setCart(response.data?.data?.items||[]);
+    } else {
+      console.log("No cart data found");
+      setCart([]);
+    }
     } catch (error) {
       console.log(error);
     }

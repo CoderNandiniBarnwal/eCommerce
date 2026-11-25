@@ -24,38 +24,6 @@ function UpdateProduct() {
     setProducts,
   } = useProductContext();
 
-  //   const handleEdit = async (id) => {
-  //     console.log(editName, editDescription, editPrice, editStock);
-  //     console.log(id);
-  //     try {
-  //       const formData = new FormData();
-  //       formData.append("name", editName);
-  //       formData.append("description", editDescription);
-  //       formData.append("price", Number(editPrice));
-  //       formData.append("stock", Number(editStock));
-  //       formData.append("picture", editPicture);
-
-  //       const response = await axios.put(
-  //         `http://localhost:8001/product/updateProduct/${id}`,
-  //         formData,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-  //           },
-  //         },
-  //       );
-
-  //       setProducts(
-  //         products.map((itemToEdit) =>
-  //           itemToEdit._id === id ? response.data.data : itemToEdit,
-  //         ),
-  //       );
-  //       setIsEditOpen(false);
-  //       console.log(response.data);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
   const handleEdit = async (id) => {
     try {
       console.log("Token:", localStorage.getItem("accessToken"));
@@ -85,9 +53,14 @@ function UpdateProduct() {
       console.log(response.data);
 
       toast.success("Product updated successfully");
-    } catch (error) {
-      console.log(error.response ? error.response.data : error);
     }
+    catch (error) {
+  console.log(error.response ? error.response.data : error);
+
+  toast.error(
+    error.response?.data?.message || "Unable to update product"
+  );
+}
   };
 
   return (

@@ -26,9 +26,14 @@ function DeleteProduct() {
 
       console.log(response);
       setIsDelOpen(false);
-    } catch (error) {
-      console.log(error);
-    }
+    } 
+    catch (error) {
+  console.log(error.response ? error.response.data : error);
+
+  toast.error(
+    error.response?.data?.message || "Unable to update product"
+  );
+}
   }
   return (
     <>

@@ -1,7 +1,8 @@
 //Register.jsx
 
-import React from "react";
+import React, { useRef } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 import { toast } from "react-toastify";
 import { useAuthContext } from "../context/AuthContext";
@@ -20,23 +21,8 @@ function Register() {
     setPicture,
   } = useAuthContext();
 
-  // const handleRegister = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const response = await axios.post("http://localhost:8001/user/register", {
-  //       userName,
-  //       email,
-  //       password,
-  //       role,
-  //       picture,
-  //     });
-
-  //     console.log(response.data);
-  //   } catch (error) {
-  //     console.log(error.response?.data || error.message);
-  //   }
-  // };
+  const fileInputRef = useRef();
+  const navigate=useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -57,6 +43,18 @@ function Register() {
 
       console.log(response.data);
       toast.success("Product registered successfully");
+      setuserName("");
+      setEmail("");
+      setPassword("");
+      setRole("");
+      setPicture(null);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      navigate("/");
+      
     } catch (error) {
       toast.error(error.response?.data.message || error.message);
       console.log(error.response?.data.message || error.message);
@@ -74,7 +72,7 @@ function Register() {
             htmlFor="userName"
             className="text-sm text-gray-700 dark:text-gray-200 mr-2"
           >
-            userName:
+            UserName:
           </label>
           <input
             type="text"
@@ -125,14 +123,20 @@ function Register() {
           >
             Role:
           </label>
-          <input
+          {/* <input 
             type="text"
             id="role"
             name="role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             className="w-full px-3 dark:text-gray-200 dark:bg-gray-900 py-2 rounded-md border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
+          />*/}
+
+          <select id="role" name="role" value={role} onChange={(e) => setRole(e.target.value)} className="w-full px-3 dark:text-gray-200 dark:bg-gray-900 py-2 rounded-md border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="select">Select</option>
+            <option value="buyer">Buyer</option>
+            <option value="seller">Seller</option>
+          </select>
         </div>
         <div className="flex items-start flex-col justify-start">
           <label
@@ -145,7 +149,7 @@ function Register() {
             type="file"
             id="picture"
             name="picture"
-            // value={picture}
+            ref={fileInputRef}
             onChange={(e) => setPicture(e.target.files[0])}
             className="w-full px-3 dark:text-gray-200 dark:bg-gray-900 py-2 rounded-md border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />

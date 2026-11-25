@@ -24,6 +24,9 @@ function Login() {
       if (response.data.success) {
         loginUser(response.data);
 
+        setEmail("");
+        setPassword("");
+
         navigate("/");
         toast.success("User Login successfully");
       }

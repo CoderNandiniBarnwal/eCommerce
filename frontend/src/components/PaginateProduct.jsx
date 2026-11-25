@@ -3,16 +3,12 @@
 import React, { useEffect } from "react";
 import { useProductContext } from "../context/ProductContext";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 function PaginateProduct() {
   const {
     sort,
-    setSort,
     search,
-    setSearch,
-    category,
-    setCategory,
-    products,
     setProducts,
     currentPage,
     setCurrentPage,
@@ -22,20 +18,26 @@ function PaginateProduct() {
 
   const fetchItem = async (page) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8001/product/paginate?page=${page}&limit=8&sort=${sort}&search=${search}`,
+         const response = await axios.get(
+        "http://localhost:8001/product/paginate",
         {
+          params: {
+            page,
+            limit: 8,
+          },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-        },
+        }
       );
 
+
       setProducts(response.data.data);
-      //   setCurrentPage(response.data.currentPage);
       setTotalPage(response.data.totalPages);
     } catch (error) {
       console.log(error);
+      console.log("RESPONSE ERROR:", error.response);
+      toast.error(error.response?.data?.message || "Error fetching products");
     }
   };
   useEffect(() => {

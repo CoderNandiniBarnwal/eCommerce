@@ -27,6 +27,7 @@ export const ProductProvider = ({ children }) => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
 
+
   return (
     <ProductContext.Provider
       value={{

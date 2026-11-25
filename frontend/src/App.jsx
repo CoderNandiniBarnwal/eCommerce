@@ -23,6 +23,8 @@ import ShowProduct from "./components/ShowProduct";
 import Footer from "./components/Footer";
 import SearchProduct from "./components/SearchProduct";
 import ThankYou from "./components/buyer/ThankYou";
+import Layout from "./components/Layout";
+import Banner from "./components/Banner";
 
 export default function App() {
   return (
@@ -32,43 +34,49 @@ export default function App() {
           <BrowserRouter>
             <ToastContainer position="top-center" autoClose={1000} draggable />
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/verify" element={<VerifyMail />} />
-              <Route
-                path="/addProduct"
-                element={
-                  <SellerRoute>
-                    <AddProduct />
-                  </SellerRoute>
-                }
-              />
-              <Route
-                path="/deleteproduct"
-                element={
-                  <SellerRoute>
-                    <DeleteProduct />
-                  </SellerRoute>
-                }
-              />
-              <Route
-                path="/updateproduct"
-                element={
-                  <SellerRoute>
-                    <UpdateProduct />
-                  </SellerRoute>
-                }
-              />
-              <Route path="/addcart" element={<AddCart />} />
-              <Route path="/deletecart" element={<DeleteCart />} />
-              <Route path="/logout" element={<Logout />} />
-              <Route path="/userprofile" element={<UserProfile />} />
-              <Route path="/showproduct" element={<ShowProduct />} />
-              <Route path="/paginate" element={<PaginateProduct />} />
-              <Route path="/footer" element={<Footer />} />
-              <Route path="/searchproduct" element={<SearchProduct />} />
-              <Route path="/thankyou" element={<ThankYou />} />
+
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/verify" element={<VerifyMail />} />
+                <Route
+                  path="/addProduct"
+                  element={
+                    <SellerRoute>
+                      <AddProduct />
+                    </SellerRoute>
+                  }
+                />
+                <Route
+                  path="/deleteproduct"
+                  element={
+                    <SellerRoute>
+                      <DeleteProduct />
+                    </SellerRoute>
+                  }
+                />
+                <Route
+                  path="/updateproduct"
+                  element={
+                    <SellerRoute>
+                      <UpdateProduct />
+                    </SellerRoute>
+                  }
+                />
+                <Route path="/addcart" element={<AddCart />} />
+                <Route path="/deletecart" element={<DeleteCart />} />
+                <Route path="/logout" element={<Logout />} />
+                <Route path="/userprofile" element={<UserProfile />} />
+                <Route path="/showproduct" element={<ShowProduct />} />
+                <Route path="/paginate" element={<PaginateProduct />} />
+                <Route path="/footer" element={<Footer />} />
+                <Route path="/searchproduct" element={<SearchProduct />} />
+                <Route path="/thankyou" element={<ThankYou />} />
+                <Route path="/banner" element={<Banner/>}/>
+              </Route>
+
+
             </Routes>
           </BrowserRouter>
         </CartProvider>
